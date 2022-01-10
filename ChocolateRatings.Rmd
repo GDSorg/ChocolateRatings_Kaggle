@@ -1,0 +1,19 @@
+---
+title: "Chocolate Ratings (Kaggle)"
+author: "Gregory Sorg"
+date: "1/10/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+
+
+```{r }
+
+```
+
