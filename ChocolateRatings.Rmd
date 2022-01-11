@@ -13,7 +13,56 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 
-```{r }
+```{r load libs and data}
+library(tidyverse)
+library(readr)
+chocolate_makers <- read_csv("data/chocolate_makers.csv")
+chocolate_ratings <- read_csv("data/chocolate_ratings.csv")
+print(head(chocolate_makers))
+print(head(chocolate_ratings))
+```
+
+Looks like a few columns will need altering/taken into account when analyzing:
+
+  * '*Country of Bean Origin*': some beans are listed as from multiple countries or a blend (i.e. "*Sao Tome & Principe*")
+  * '*Specific Bean Origin or Bar Name*` :  batch numbers, multiple descriptors
+  * '*Cocoa Percent*':  percent sign should be removed
+  * '*Ingredients*': should be divided into number then the letters designating the ingredients
+  * '*Most Memorable Characteristics*':  Descriptors are separated by commas, with multiple characteristics per bar
+  
+Start by making a new column for number of ingredients, dummy values for each of the ingredients, and remove percent sign from *Cocoa Percent*:
+
+```{r ingredient columns, warning=FALSE}
+chocolate_ratings <- chocolate_ratings %>%
+  mutate(NumberIngredients = map_chr(str_split(Ingredients, "-"),1),
+         IngredientList = (str_split(Ingredients, "-")))%>%
+  mutate(IngredientList = map(IngredientList, 2))%>%
+  mutate(IngredientB = if_else(str_detect(IngredientList, "B"),1,0),
+         IngredientS = if_else(str_detect(IngredientList, "S"),1,0),  #This will return 1 for Sa but there are no occurrences of Sa without also S
+         IngredientC = if_else(str_detect(IngredientList, "C"),1,0),
+         IngredientL = if_else(str_detect(IngredientList, "L"),1,0),
+         IngredientV = if_else(str_detect(IngredientList, "V"),1,0),
+         IngredientSa = if_else(str_detect(IngredientList, "Sa"),1,0))%>%
+  mutate(CocoaPercent=as.numeric(str_sub(`Cocoa Percent`, 1,nchar(`Cocoa Percent`)-1)))
+
 
 ```
 
+```{r}
+unnest_test<- chocolate_ratings %>%
+  mutate(`Most Memorable Characteristics`= str_split(`Most Memorable Characteristics`, ","))%>%
+  unnest_wider(`Most Memorable Characteristics`)
+library(fastDummies)
+unnest_test_dum1<- unnest_test %>%
+  dummy_cols(c("...1", "...2", "...3","...4", "...5"))
+
+#step in right direction, need to eliminate the preceeding '...#' for dummy variables, then combine matching names
+
+
+
+
+```
+
+  
+  
+  
